@@ -56,7 +56,9 @@
           .load().then(function (ff) { document.fonts.add(ff); }).catch(function () {});
       });
 
-      var resto = decodeURIComponent(location.pathname.slice(base.length)).replace(/\/+$/, "").toLowerCase();
+      // no modo "Deploy from a branch" o 404 da raiz manda o caminho original em ?de=
+      var de = new URLSearchParams(location.search).get("de");
+      var resto = (de !== null ? de : decodeURIComponent(location.pathname.slice(base.length))).replace(/\/+$/, "").toLowerCase();
       if (resto !== "pe" && resto !== "pé") return;
 
       document.title = "¶ achou";

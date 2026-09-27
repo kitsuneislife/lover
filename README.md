@@ -114,7 +114,9 @@ Os testes resolvem cada página com a ação de verdade sempre que o Playwright 
 
 ## Publicar
 
-O workflow `pages.yml` publica a pasta `site/` a cada push na `main` que mexa nela. Na primeira vez, vá em **Settings → Pages** e escolha **GitHub Actions** como fonte.
+O workflow `pages.yml` publica a pasta `site/` a cada push na `main` que mexa nela. Para isso, em **Settings → Pages**, a fonte precisa ser **GitHub Actions**. Assim o jogo fica em `kitsuneislife.github.io/lover/`.
+
+Se a fonte estiver em **Deploy from a branch**, o GitHub publica a raiz do repositório. Para esse caso existem um `index.html` e um `404.html` na raiz que só encaminham para `site/`: o jogo abre em `…/lover/site/` e o § 29 continua funcionando.
 
 Para a prévia que aparece quando alguém compartilha o link do repositório, envie `docs/readme/social.png` em **Settings → General → Social preview**.
 

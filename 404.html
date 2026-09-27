@@ -1,0 +1,26 @@
+<!doctype html>
+<!--
+  Rede de segurança para o modo "Deploy from a branch": nele o GitHub Pages usa o 404.html da raiz.
+  Endereços dentro de site/ vão para o 404 do jogo (o § 29 precisa dele), levando o caminho em ?de=.
+  O resto vai para o começo do jogo.
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>¶ lugar nenhum</title>
+  <script>
+    (function () {
+      var p = location.pathname;
+      var i = p.indexOf("/site/");
+      if (i >= 0) {
+        location.replace(p.slice(0, i) + "/site/404.html?de=" + encodeURIComponent(p.slice(i + 6)));
+        return;
+      }
+      var seg = p.split("/").filter(Boolean)[0];
+      var base = /github\.io$/.test(location.hostname) && seg ? "/" + seg + "/" : "/";
+      location.replace(base + "site/");
+    })();
+  </script>
+</head>
+<body></body>
+</html>
