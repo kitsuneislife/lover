@@ -1,0 +1,19 @@
+<!doctype html>
+<!--
+  Rede de segurança para o GitHub Pages no modo "Deploy from a branch", que publica a raiz do repositório.
+  O jogo mora em site/; esta página só encaminha para lá. Com a fonte em "GitHub Actions",
+  o workflow publica site/ direto e este arquivo nem vai para o ar.
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>não feche esta aba</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="0; url=site/">
+  <link rel="canonical" href="site/">
+  <script>location.replace("site/" + location.search + location.hash);</script>
+</head>
+<body>
+  <p><a href="site/">Abrir o jogo</a></p>
+</body>
+</html>
