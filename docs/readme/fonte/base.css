@@ -1,0 +1,133 @@
+/* Base das imagens do README. Mesmas fontes, cores e personagens do jogo. */
+
+@font-face { font-family: "Bodoni Moda"; src: url("/site/assets/fonts/bodoni-moda.woff2") format("woff2"); font-weight: 400 900; }
+@font-face { font-family: "Bodoni Moda"; src: url("/site/assets/fonts/bodoni-moda-italic.woff2") format("woff2"); font-weight: 400 900; font-style: italic; }
+@font-face { font-family: "Atkinson Hyperlegible Next"; src: url("/site/assets/fonts/atkinson-next.woff2") format("woff2"); font-weight: 200 800; }
+@font-face { font-family: "Atkinson Hyperlegible Next"; src: url("/site/assets/fonts/atkinson-next-italic.woff2") format("woff2"); font-weight: 200 800; font-style: italic; }
+
+:root {
+  --papel: #ffffff;
+  --tinta: #000000;
+  --tinta-2: #3d3d3d;
+  --tinta-3: #6b6b6b;
+  --link: #0000ee;
+  --visitado: #551a8b;
+  --selecao: #b4d5fe;
+  --achado: #ffff00;
+  --achado-ativo: #ff9632;
+  --noite: #15174a;
+  --invisivel: #8fb3e6;
+  --olho: #ffffff;
+  --pupila: #000000;
+  --moldura: #e9ecf3;
+  --display: "Bodoni Moda", Didot, Georgia, serif;
+  --texto: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+}
+:root[data-tema="escuro"] {
+  --papel: #15174a;
+  --tinta: #f1f1ff;
+  --tinta-2: #c9cae8;
+  --tinta-3: #9496c4;
+  --link: #a9b8ff;
+  --visitado: #d3a8ff;
+  --selecao: #3a4fb8;
+  --invisivel: #4b58b8;
+  --olho: #ffff00;
+  --moldura: #262a66;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: transparent; }
+body { font: 400 16px/1.5 var(--texto); color: var(--tinta); -webkit-font-smoothing: antialiased; }
+#cartaz { width: 880px; position: relative; }
+
+/* personagens (as mesmas regras do jogo, sem animação) */
+.pe { overflow: visible; color: var(--tinta); display: block; }
+.pe .corpo { fill: currentColor; }
+.pe .olho-branco { fill: var(--olho); }
+.pe .pupila { fill: var(--pupila); }
+.pe .palpebra { transform-box: fill-box; transform-origin: center; }
+.pe[data-piscando] .palpebra { transform: scaleY(0.08); }
+.pe .boca { fill: none; stroke: var(--olho); stroke-width: 2.6; stroke-linecap: round; opacity: 0; }
+.pe[data-humor="feliz"] .boca-feliz, .pe[data-humor="triste"] .boca-triste { opacity: 1; }
+.pe[data-humor="feliz"] .palpebra { transform: scaleY(0.45) translateY(-2px); }
+.pe[data-humor="dormindo"] .palpebra { transform: scaleY(0.08); }
+.pe .chapeu { opacity: 0; }
+.pe[data-chapeu] .chapeu { opacity: 1; }
+
+.ast { overflow: visible; display: block; }
+.ast-bracos { fill: var(--achado); }
+.ast-olho { fill: #fff; }
+.ast-pupila { fill: #0000ee; }
+.ast-sobrancelha { stroke: #0000ee; stroke-width: 4; stroke-linecap: round; fill: none; }
+
+/* balão de fala */
+.balao {
+  position: absolute;
+  background: var(--papel);
+  color: var(--tinta);
+  border: 2px solid var(--tinta);
+  border-radius: 18px;
+  padding: 8px 14px;
+  font: 700 17px/1.2 var(--texto);
+  white-space: nowrap;
+}
+.balao::after {
+  content: "";
+  position: absolute;
+  width: 14px; height: 14px;
+  background: inherit;
+  border: inherit;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  bottom: -9px; left: 22px;
+}
+
+/* tecla */
+kbd {
+  font: 700 13px/1 var(--texto);
+  display: inline-block;
+  padding: 5px 8px 6px;
+  min-width: 26px;
+  text-align: center;
+  border: 1.5px solid currentColor;
+  border-bottom-width: 3px;
+  border-radius: 7px;
+  background: var(--papel);
+}
+
+/* janela de navegador, desenhada no mesmo espírito do jogo */
+.janela {
+  background: var(--papel);
+  border-radius: 18px;
+  border: 2px solid var(--tinta);
+  overflow: hidden;
+  box-shadow: 0 18px 0 -6px rgba(0, 0, 0, 0.08), 0 30px 60px -20px rgba(0, 0, 60, 0.35);
+}
+.abas { display: flex; align-items: flex-end; gap: 6px; padding: 10px 14px 0; background: var(--moldura); }
+.aba {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--papel);
+  border: 2px solid var(--tinta);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  padding: 7px 12px 8px;
+  font: 600 13.5px/1 var(--texto);
+  max-width: 280px;
+  margin-bottom: -2px;
+  position: relative;
+}
+.aba.apagada { background: transparent; border-color: transparent; color: var(--tinta-3); }
+.aba .fav { width: 16px; height: 22px; }
+.aba .x { margin-left: 10px; font-size: 16px; color: var(--tinta-3); }
+.endereco {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 2px solid var(--tinta);
+  background: var(--papel);
+  font: 500 13.5px/1 var(--texto);
+  color: var(--tinta-2);
+}
+.endereco .setas { letter-spacing: 6px; color: var(--tinta-3); }
+.endereco .url { flex: 1; background: var(--moldura); border-radius: 999px; padding: 7px 14px; }

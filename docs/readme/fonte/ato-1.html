@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  #cartaz { padding: 20px 24px 34px; }
+  .folha { background: #fff; border: 2.5px solid #000; border-radius: 26px; padding: 30px 30px 32px; color: #000; position: relative; }
+  .cabeca { display: flex; align-items: flex-end; gap: 20px; margin-bottom: 24px; }
+  .cabeca h2 { font: 800 64px/0.85 var(--display); margin: 0; letter-spacing: -0.03em; }
+  .cabeca p { margin: 0 0 4px; font: italic 500 21px/1.2 var(--display); color: #3d3d3d; }
+  .cabeca .pe-canto { margin-left: auto; }
+  .grade { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .carta {
+    border: 2px solid #000; border-radius: 16px; padding: 12px 13px 13px;
+    min-height: 128px; display: flex; flex-direction: column; background: #fff;
+  }
+  .carta:nth-child(4n+2) { transform: rotate(0.6deg); }
+  .carta:nth-child(4n+3) { transform: rotate(-0.5deg); }
+  .num { font: 400 32px/1 var(--display); }
+  .nome { font: italic 600 16.5px/1.15 var(--display); margin: 3px 0 10px; }
+  .controle { margin-top: auto; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font: 600 12.5px/1.3 var(--texto); }
+  .sel { background: #b4d5fe; padding: 1px 3px; }
+  .url { color: #0000ee; text-decoration: underline; }
+  .achado { background: #ffff00; padding: 1px 3px; }
+  .carta.final { background: #000; color: #fff; }
+  .carta.final kbd { background: #000; color: #fff; }
+  .carta:first-child { background: #b4d5fe; }
+</style>
+</head>
+<body>
+<div id="cartaz">
+  <div class="folha">
+    <div class="cabeca">
+      <h2>Ato I</h2>
+      <p>a página. dezesseis botões que o navegador<br>sempre teve e quase ninguém aperta.</p>
+      <span class="pe-canto" id="pe"></span>
+    </div>
+    <div class="grade" id="grade"></div>
+  </div>
+</div>
+<script type="module">
+  import { pe, pronto } from "./pecas.js";
+  import { FASES, ATO2 } from "/site/js/fases/index.js";
+  const CONTROLES = [
+    '<span class="sel">selecionar texto</span>',
+    "<kbd>Tab</kbd><kbd>Tab</kbd><kbd>Tab</kbd>",
+    '<kbd>Ctrl</kbd><kbd>F</kbd> <span class="achado">agulha</span>',
+    "<kbd>Ctrl</kbd><kbd>+</kbd> zoom",
+    "redimensionar a janela",
+    '<span class="url">#porta=aberta</span>',
+    "<kbd>←</kbd> botão Voltar",
+    "olhar outra aba",
+    "abrir uma segunda aba",
+    "<kbd>Ctrl</kbd><kbd>C</kbd> <kbd>Ctrl</kbd><kbd>V</kbd>",
+    "tema escuro do sistema",
+    "<kbd>F12</kbd> console",
+    "editar o localStorage",
+    "desligar a internet",
+    "<kbd>Ctrl</kbd><kbd>P</kbd> imprimir",
+    "<kbd>Ctrl</kbd><kbd>W</kbd> fechar",
+  ];
+  const grade = document.getElementById("grade");
+  FASES.slice(0, ATO2).forEach((f, i) => {
+    const c = document.createElement("div");
+    c.className = "carta" + (i === ATO2 - 1 ? " final" : "");
+    c.innerHTML = `<span class="num">§ ${i + 1}</span><span class="nome">${f.nome}</span><span class="controle">${CONTROLES[i]}</span>`;
+    grade.append(c);
+  });
+  document.getElementById("pe").append(pe({ largura: 58, humor: "feliz", olhar: [-0.5, 0.4] }));
+  pronto();
+</script>
+</body>
+</html>

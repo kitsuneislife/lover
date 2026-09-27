@@ -3,6 +3,7 @@ name: Publicar no GitHub Pages
 on:
   push:
     branches: [main]
+    paths: ["site/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -23,12 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      - name: Montar pasta do site
-        run: |
-          mkdir _site
-          cp -r index.html 404.html sonda.txt manifest.webmanifest sw.js .nojekyll css js assets _site/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: site
       - id: deploy
         uses: actions/deploy-pages@v4

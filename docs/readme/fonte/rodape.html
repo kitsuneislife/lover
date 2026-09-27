@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  #cartaz { width: 520px; height: 232px; background: var(--papel); overflow: hidden; }
+  .cena { position: absolute; left: 40px; bottom: 18px; }
+  .ast-chapeu { position: absolute; left: 42px; top: 0; }
+  .texto { position: absolute; left: 186px; top: 84px; width: 310px; }
+  .texto p { margin: 0; font: italic 600 22px/1.2 var(--display); color: var(--tinta); }
+  .texto small { display: block; margin-top: 10px; font: 500 13.5px/1.3 var(--texto); color: var(--tinta-3); }
+  /* no README o GIF fica sobre o fundo do GitHub; no escuro ele é #0d1117 */
+  :root[data-tema="escuro"] #cartaz { background: #0d1117; }
+  .linha { position: absolute; left: 186px; top: 72px; width: 70px; border-top: 1.5px solid var(--tinta); }
+</style>
+</head>
+<body>
+<div id="cartaz">
+  <div class="cena" id="cena"><div class="ast-chapeu" id="ast"></div></div>
+  <span class="linha"></span>
+  <div class="texto"><p>*obrigado por ler até o rodapé.</p><small>quase ninguém lê. o Asterisco ficou emocionado.</small></div>
+</div>
+<script type="module">
+  import { pe, ast, pronto } from "./pecas.js";
+  const cena = document.getElementById("cena");
+  const casaAst = document.getElementById("ast");
+  let pePeca = null;
+  let astPeca = null;
+  // 24 quadros: o Asterisco gira no chapéu, o Pé olha em volta e pisca duas vezes
+  window.QUADROS = 24;
+  window.atraso = (i) => (i === 9 || i === 19 ? 110 : 90);
+  window.quadro = (i) => {
+    const t = i / window.QUADROS;
+    const olhar = [Math.cos(t * Math.PI * 2) * 0.9, Math.sin(t * Math.PI * 2) * 0.5];
+    const piscando = i === 9 || i === 19;
+    const novoPe = pe({ largura: 96, chapeu: true, olhar, piscando, humor: i >= 12 && i < 18 ? "feliz" : "" });
+    novoPe.style.transform = `translateY(${Math.abs(Math.sin(t * Math.PI * 4)) * -6}px)`;
+    pePeca ? pePeca.replaceWith(novoPe) : cena.prepend(novoPe);
+    pePeca = novoPe;
+    const novoAst = ast({ largura: 36, girar: t * 360, olhar: [-olhar[0], olhar[1]] });
+    astPeca ? astPeca.replaceWith(novoAst) : casaAst.append(novoAst);
+    astPeca = novoAst;
+    casaAst.style.transform = `translateY(${Math.abs(Math.sin(t * Math.PI * 4)) * -6 - 30}px)`;
+  };
+  window.quadro(0);
+  pronto();
+</script>
+</body>
+</html>
