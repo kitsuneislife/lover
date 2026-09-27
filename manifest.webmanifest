@@ -1,0 +1,12 @@
+{
+  "name": "não feche esta aba",
+  "short_name": "¶",
+  "description": "Um jogo em que o controle é o seu navegador.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [{ "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
