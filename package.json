@@ -1,0 +1,20 @@
+{
+  "name": "nao-feche-esta-aba",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Um jogo de quebra-cabeça em que o controle é o seu navegador.",
+  "type": "module",
+  "scripts": {
+    "dev": "node tools/servidor.mjs 8000",
+    "test": "node tests/ato-1.mjs && node tests/ato-2.mjs",
+    "test:ato1": "node tests/ato-1.mjs",
+    "test:ato2": "node tests/ato-2.mjs",
+    "readme": "node tools/render-readme.mjs"
+  },
+  "devDependencies": {
+    "gifenc": "^1.0.3",
+    "playwright": "1.56.1",
+    "pngjs": "^7.0.0"
+  },
+  "license": "GPL-3.0"
+}

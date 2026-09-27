@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  #cartaz { padding: 34px 40px 56px; }
+  .janela { position: relative; }
+  .pagina { display: grid; grid-template-columns: 150px 1fr; gap: 28px; padding: 44px 44px 40px 30px; min-height: 330px; }
+  .margem { display: flex; justify-content: flex-end; padding-top: 12px; }
+  h1 {
+    font: 800 80px/0.86 var(--display);
+    letter-spacing: -0.035em;
+    margin: 0 0 22px;
+  }
+  .fala { margin: 0 0 8px; font-size: 18px; color: var(--tinta); }
+  .fala::after { content: "¶"; font-family: var(--display); color: var(--invisivel); margin-left: 4px; }
+  .fala.segunda { color: var(--tinta-2); }
+  .acao {
+    display: inline-block; margin-top: 18px;
+    font: 700 16px/1 var(--texto);
+    background: var(--tinta); color: var(--papel);
+    border-radius: 999px; padding: 13px 22px;
+  }
+  /* o drama no canto da aba */
+  .aba .x { position: relative; }
+  .cursor { position: absolute; width: 30px; filter: drop-shadow(2px 3px 0 rgba(0,0,0,.18)); z-index: 3; }
+  .rastro { position: absolute; width: 230px; height: 90px; overflow: visible; z-index: 2; }
+  .guarda { position: absolute; z-index: 3; }
+  .balao-x { transform: rotate(-4deg); z-index: 3; font-size: 15px; padding: 6px 12px; }
+  .balao-x::after { left: -8px; bottom: 10px; border-width: 0 0 2px 2px; }
+  .espiao { position: absolute; right: 150px; bottom: -22px; }
+  .espiao .ast { transform: rotate(-12deg); }
+  .balao-ast { right: 222px; bottom: 30px; background: var(--achado); color: #000; font: italic 600 17px/1.1 var(--display); transform: rotate(-3deg); border-color: #000; }
+  .balao-ast::after { left: auto; right: -9px; bottom: 12px; border-width: 2px 2px 0 0; }
+  .selo {
+    position: absolute; right: 46px; top: 124px;
+    width: 112px; height: 112px; border-radius: 50%;
+    background: var(--achado); color: #000;
+    display: grid; place-items: center; text-align: center;
+    font: italic 700 17px/1.1 var(--display);
+    transform: rotate(10deg);
+    border: 2px solid #000;
+    padding: 12px;
+  }
+  .selo b { display: block; font: 800 34px/1 var(--display); font-style: normal; }
+</style>
+</head>
+<body>
+<div id="cartaz">
+  <div class="janela">
+    <div class="abas">
+      <div class="aba"><span class="fav"></span><span>¶ não feche esta aba</span><span class="x">×</span></div>
+      <div class="aba apagada">+</div>
+    </div>
+    <div class="endereco"><span class="setas">← →</span><span class="url">kitsuneislife.github.io/lover</span></div>
+    <div class="pagina">
+      <div class="margem" id="pe-grande"></div>
+      <div>
+        <h1>não feche<br>esta aba.</h1>
+        <p class="fala">oi. eu sou o Pé, o pé-de-mosca.</p>
+        <p class="fala segunda">fiquei preso aqui dentro e a saída passa pelo seu navegador.</p>
+        <span class="acao">Abrir o § 1</span>
+      </div>
+    </div>
+    <div class="selo"><span><b>32</b>páginas, dois atos</span></div>
+    <div class="espiao" id="espiao"></div>
+    <div class="balao balao-ast">*ou feche. eu espero.</div>
+  </div>
+
+  <div class="guarda" id="guarda"></div>
+  <div class="balao balao-x">não fecha!</div>
+  <svg class="rastro" viewBox="0 0 230 90" aria-hidden="true"><path d="M225 80 C 170 84, 60 70, 6 8" fill="none" stroke="var(--tinta-3)" stroke-width="2.5" stroke-dasharray="3 9" stroke-linecap="round"/></svg>
+  <svg class="cursor" viewBox="0 0 24 36" aria-hidden="true"><path d="M2 2 L2 28 L9 21 L14 33 L19 31 L14 19 L23 19 Z" fill="var(--papel)" stroke="var(--tinta)" stroke-width="2.2" stroke-linejoin="round"/></svg>
+</div>
+<script type="module">
+  import { pe, ast, pronto } from "./pecas.js";
+  document.querySelector(".fav").append(pe({ largura: 16 }));
+  document.getElementById("pe-grande").append(pe({ largura: 118, olhar: [0.9, -0.9], humor: "" }));
+  document.getElementById("guarda").append(pe({ largura: 24, olhar: [0.6, 1], humor: "triste" }));
+  document.getElementById("espiao").append(ast({ largura: 64, girar: 14, olhar: [-0.8, -0.6] }));
+  // posiciona a cena em volta do × da aba, depois das fontes (elas mudam a largura da aba)
+  await document.fonts.ready;
+  const cartaz = document.getElementById("cartaz").getBoundingClientRect();
+  const x = document.querySelector(".aba .x").getBoundingClientRect();
+  const X = x.left - cartaz.left, Y = x.top - cartaz.top;
+  const topoAba = document.querySelector(".aba").getBoundingClientRect().top - cartaz.top;
+  const guarda = document.getElementById("guarda");
+  Object.assign(guarda.style, { left: X - 8 + "px", top: topoAba - 37 + "px" });
+  Object.assign(document.querySelector(".balao-x").style, { left: X + 26 + "px", top: topoAba - 36 + "px" });
+  Object.assign(document.querySelector(".cursor").style, { left: X + 7 + "px", top: Y + 15 + "px" });
+  Object.assign(document.querySelector(".rastro").style, { left: X + 26 + "px", top: Y + 36 + "px" });
+  pronto();
+</script>
+</body>
+</html>

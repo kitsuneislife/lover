@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  #cartaz { padding: 30px 26px 40px; display: flex; justify-content: center; gap: 0; }
+  .rg {
+    width: 408px;
+    border: 2.5px solid #000;
+    border-radius: 20px;
+    padding: 18px 20px 16px;
+    position: relative;
+    box-shadow: 0 8px 0 rgba(0,0,0,.9);
+    color: #000;
+  }
+  .rg.pe-rg { background: #fff; transform: rotate(-2.5deg); z-index: 1; }
+  .rg.ast-rg { background: #ffff00; transform: rotate(2deg) translate(-10px, 22px); }
+  .topo { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 14px; }
+  .pais { font: 800 11.5px/1.2 var(--texto); letter-spacing: 0.08em; text-transform: uppercase; }
+  .doc { font: italic 600 15px/1 var(--display); }
+  .corpo { display: grid; grid-template-columns: 120px 1fr; gap: 16px; }
+  .foto {
+    height: 150px; border: 2px solid #000; border-radius: 12px;
+    display: grid; place-items: center;
+    background: repeating-linear-gradient(135deg, transparent 0 9px, rgba(0,0,0,.06) 9px 10px);
+  }
+  .pe-rg .foto { background-color: #b4d5fe; }
+  .ast-rg .foto { background-color: #0000ee; }
+  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 5px 10px; font-size: 13.5px; line-height: 1.25; }
+  dt { font: 700 10.5px/1.5 var(--texto); letter-spacing: 0.06em; text-transform: uppercase; opacity: .6; }
+  dd { margin: 0; font-weight: 600; }
+  .nome { font: 800 30px/1 var(--display); margin: 0 0 10px; letter-spacing: -0.02em; }
+  .rodape-rg { display: flex; justify-content: space-between; align-items: end; margin-top: 14px; }
+  .assinatura { font: italic 500 26px/1 var(--display); border-top: 1.5px solid #000; padding-top: 4px; min-width: 150px; }
+  .assinatura small { display: block; font: 700 10px/1.4 var(--texto); letter-spacing: 0.06em; text-transform: uppercase; opacity: .6; }
+  .digital {
+    width: 62px; height: 72px; border: 2px dashed rgba(0,0,0,.5); border-radius: 30px 30px 26px 26px;
+    display: grid; place-items: center;
+    font: 800 44px/1 var(--display); color: rgba(0,0,0,.28);
+  }
+  .carimbo {
+    position: absolute; right: 100px; bottom: 40px;
+    font: 800 13px/1 var(--texto); letter-spacing: .1em; text-transform: uppercase;
+    color: #0000ee; border: 2.5px solid #0000ee; border-radius: 6px; padding: 6px 8px;
+    transform: rotate(-12deg); opacity: .85;
+  }
+  .ast-rg .carimbo { color: #c00; border-color: #c00; transform: rotate(9deg); }
+</style>
+</head>
+<body>
+<div id="cartaz">
+  <div class="rg pe-rg">
+    <div class="topo"><span class="pais">República Tipográfica do Navegador</span><span class="doc">identidade</span></div>
+    <div class="corpo">
+      <div class="foto" id="foto-pe"></div>
+      <div>
+        <p class="nome">Pé</p>
+        <dl>
+          <dt>nome</dt><dd>pé-de-mosca</dd>
+          <dt>unicode</dt><dd>U+00B6 ¶</dd>
+          <dt>mora</dt><dd>no fim dos parágrafos</dd>
+          <dt>medo</dt><dd>da setinha do mouse</dd>
+          <dt>atalho</dt><dd>Alt + 0182</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="rodape-rg">
+      <div class="assinatura">Pé<small>assinatura do titular</small></div>
+      <div class="digital">¶</div>
+    </div>
+    <span class="carimbo">protagonista</span>
+  </div>
+
+  <div class="rg ast-rg">
+    <div class="topo"><span class="pais">República Tipográfica do Navegador</span><span class="doc">identidade*</span></div>
+    <div class="corpo">
+      <div class="foto" id="foto-ast"></div>
+      <div>
+        <p class="nome">Asterisco</p>
+        <dl>
+          <dt>nome</dt><dd>asterisco, só</dd>
+          <dt>unicode</dt><dd>U+002A *</dd>
+          <dt>mora</dt><dd>nas notas de rodapé</dd>
+          <dt>ofício</dt><dd>letras miúdas</dd>
+          <dt>lema</dt><dd>condições se aplicam</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="rodape-rg">
+      <div class="assinatura">*<small>assinatura do titular*</small></div>
+      <div class="digital">*</div>
+    </div>
+    <span class="carimbo">vilão (ato II)</span>
+  </div>
+</div>
+<script type="module">
+  import { pe, ast, pronto } from "./pecas.js";
+  document.getElementById("foto-pe").append(pe({ largura: 64, chapeu: true, olhar: [0.2, 0.3], cor: "#000" }));
+  document.getElementById("foto-ast").append(ast({ largura: 86, girar: 8, olhar: [0.6, 0.3] }));
+  pronto();
+</script>
+</body>
+</html>

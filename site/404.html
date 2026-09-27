@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>¶ lugar nenhum</title>
+  <meta name="theme-color" content="#0000EE">
+  <style>
+    :root { --papel: #0000ee; --tinta: #fff; --amarelo: #ffff00; color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100dvh; background: var(--papel); color: var(--tinta);
+      font: 400 1.125rem/1.55 "Atkinson Hyperlegible Next", system-ui, sans-serif;
+      display: grid; place-items: center; padding: 1.5rem;
+    }
+    main { max-width: 34rem; width: 100%; }
+    h1 {
+      font-family: "Bodoni Moda", Didot, "Bodoni 72", Georgia, serif; font-weight: 800;
+      font-size: clamp(6rem, 30vw, 14rem); line-height: 0.85; letter-spacing: -0.04em; margin: 0 0 1rem;
+    }
+    p { margin: 0 0 1rem; }
+    .ast { color: var(--amarelo); font-family: "Bodoni Moda", Georgia, serif; font-style: italic; }
+    a { color: var(--amarelo); font-weight: 700; }
+    a:focus-visible { outline: 3px solid #ff9632; outline-offset: 3px; }
+    svg { width: 7rem; height: auto; display: block; margin-bottom: 1rem; }
+    ::selection { background: var(--amarelo); color: var(--papel); }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="pe"></div>
+    <h1>404</h1>
+    <p id="texto">esta página não existe.</p>
+    <p class="ast" id="ast">*nem eu sei onde fica.</p>
+    <p><a id="voltar" href="./">Voltar para o jogo</a></p>
+  </main>
+  <script>
+    // O 404.html fica fora da pasta do jogo quando o endereço tem subpastas,
+    // então descobre a base pelo que o jogo guardou, ou pelo primeiro trecho do caminho.
+    (function () {
+      var base = null;
+      try { base = localStorage.getItem("nfea.base"); } catch (e) {}
+      if (!base) {
+        var seg = location.pathname.split("/").filter(Boolean)[0];
+        base = /github\.io$/.test(location.hostname) && seg ? "/" + seg + "/" : "/";
+      }
+      document.getElementById("voltar").href = base;
+
+      var fontes = [
+        ["Bodoni Moda", "bodoni-moda.woff2", "400 900", "normal"],
+        ["Bodoni Moda", "bodoni-moda-italic.woff2", "400 900", "italic"],
+        ["Atkinson Hyperlegible Next", "atkinson-next.woff2", "200 800", "normal"]
+      ];
+      if (window.FontFace) fontes.forEach(function (f) {
+        new FontFace(f[0], "url(" + base + "assets/fonts/" + f[1] + ")", { weight: f[2], style: f[3] })
+          .load().then(function (ff) { document.fonts.add(ff); }).catch(function () {});
+      });
+
+      var resto = decodeURIComponent(location.pathname.slice(base.length)).replace(/\/+$/, "").toLowerCase();
+      if (resto !== "pe" && resto !== "pé") return;
+
+      document.title = "¶ achou";
+      document.getElementById("pe").innerHTML =
+        '<svg viewBox="0 -36 100 172" role="img" aria-label="O Pé, de chapéu">' +
+        '<path fill="#fff" d="M34 1h58v5H34ZM44 -32h38v34H44Z"/><path fill="#ffff00" d="M44 -8h38v5H44Z"/>' +
+        '<path fill="#fff" d="M58 68H42a30 30 0 0 1 0-60h16ZM40 8h44v5H40ZM52 8h9v120h-9ZM70 8h9v120h-9ZM47 126h19v3H47ZM65 126h19v3H65Z"/>' +
+        '<circle cx="26" cy="37" r="7.5" fill="#0000ee"/><circle cx="44" cy="37" r="7.5" fill="#0000ee"/>' +
+        '<circle cx="27" cy="38" r="3.6" fill="#fff"/><circle cx="45" cy="38" r="3.6" fill="#fff"/></svg>';
+      document.getElementById("texto").textContent =
+        "página não encontrada. o Pé, sim. você me achou no lugar nenhum!";
+      document.getElementById("ast").textContent = "*tá. pode voltar. ele vai junto.";
+      try { localStorage.setItem("nfea.achou404", JSON.stringify(Date.now())); } catch (e) {}
+      try { new BroadcastChannel("nfea").postMessage({ t: "achou-404" }); } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  /* 1280 x 640: tamanho da prévia social do GitHub */
+  #cartaz { width: 640px; height: 320px; background: #fff; overflow: hidden; color: #000; }
+  .meio { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; }
+  .claro { padding: 40px 0 0 44px; position: relative; }
+  .claro h1 { font: 800 60px/0.86 var(--display); margin: 0; letter-spacing: -0.035em; }
+  .claro p { font: 500 14px/1.35 var(--texto); margin: 16px 0 0; color: #3d3d3d; width: 250px; }
+  .azul { background: #0000ee; position: relative; }
+  .pe-grande { position: absolute; left: 70px; bottom: 30px; --olho: #0000ee; --pupila: #fff; }
+  .ast-d { position: absolute; right: 38px; top: 34px; }
+  .balao { font-size: 14px; }
+  .b1 { right: 30px; top: 118px; background: #ffff00; font: italic 600 15px/1.1 var(--display); transform: rotate(-3deg); }
+  .b1::after { left: auto; right: 40px; top: -9px; bottom: auto; border-width: 2px 0 0 2px; }
+  .url { position: absolute; left: 44px; bottom: 24px; font: 700 13px/1 var(--texto); color: #0000ee; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div id="cartaz">
+  <div class="meio">
+    <div class="claro">
+      <h1>não feche esta aba.</h1>
+      <p>um jogo de quebra-cabeça em que o controle é o seu navegador.</p>
+      <span class="url">kitsuneislife.github.io/lover</span>
+    </div>
+    <div class="azul">
+      <div class="pe-grande" id="pe"></div>
+      <div class="ast-d" id="ast"></div>
+      <div class="balao b1">*condições se aplicam.</div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { pe, ast, pronto } from "./pecas.js";
+  document.getElementById("pe").append(pe({ largura: 118, chapeu: true, olhar: [0.9, -0.6], cor: "#fff" }));
+  document.getElementById("ast").append(ast({ largura: 70, girar: 12, olhar: [-0.9, 0.4] }));
+  pronto();
+</script>
+</body>
+</html>

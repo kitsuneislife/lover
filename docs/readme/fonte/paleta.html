@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="base.css">
+<style>
+  #cartaz { height: 470px; padding: 20px 24px; }
+  .mesa { position: relative; height: 100%; background: #fff; border: 2.5px solid #000; border-radius: 26px; overflow: hidden; color: #000; }
+  .texto { position: absolute; left: 34px; top: 34px; width: 300px; }
+  .texto h2 { font: 800 44px/0.95 var(--display); margin: 0 0 14px; letter-spacing: -0.02em; }
+  .texto p { margin: 0; font-size: 16px; color: #3d3d3d; line-height: 1.45; }
+  .leque { position: absolute; left: 600px; top: 404px; }
+  .tira {
+    position: absolute; left: -38px; bottom: 0; width: 76px; height: 300px;
+    border: 2px solid #000; border-radius: 12px 12px 30px 30px;
+    transform-origin: 50% 95%;
+    padding: 10px 8px 0;
+    box-shadow: 0 2px 0 rgba(0,0,0,.15);
+    font: 700 11.5px/1.2 var(--texto);
+  }
+  .tira b { display: block; font: italic 700 14.5px/1.05 var(--display); margin-bottom: 4px; }
+  .tira small { display: block; font: 500 10px/1.2 var(--texto); margin-top: 3px; opacity: .8; }
+  .pino { position: absolute; left: -11px; top: -26px; width: 22px; height: 22px; border-radius: 50%; background: #000; border: 3px solid #ffff00; z-index: 20; }
+  .pintor { position: absolute; left: 40px; bottom: 0; }
+  .texto { width: 330px; }
+</style>
+</head>
+<body>
+<div id="cartaz">
+  <div class="mesa">
+    <div class="texto">
+      <h2>as cores já estavam no seu navegador.</h2>
+      <p>O jogo não inventou nenhuma. Azul de link, roxo de visitado, o azul da seleção e o amarelo do Ctrl+F estão em qualquer navegador desde os anos 90.</p>
+    </div>
+    <div class="leque" id="leque"><span class="pino"></span></div>
+    <div class="pintor" id="pintor"></div>
+  </div>
+</div>
+<script type="module">
+  import { pe, pronto } from "./pecas.js";
+  const CORES = [
+    ["papel", "#FFFFFF", "fundo sem CSS"],
+    ["tinta", "#000000", "texto padrão"],
+    ["seleção", "#B4D5FE", "texto selecionado"],
+    ["achado", "#FFFF00", "Ctrl+F"],
+    ["achado ativo", "#FF9632", "resultado atual"],
+    ["link", "#0000EE", "a:link"],
+    ["visitado", "#551A8B", "a:visited"],
+    ["noite", "#15174A", "modo escuro"],
+  ];
+  const leque = document.getElementById("leque");
+  CORES.forEach(([nome, hex, origem], i) => {
+    const t = document.createElement("div");
+    t.className = "tira";
+    const ang = -42 + i * 12.5;
+    t.style.transform = `rotate(${ang}deg)`;
+    t.style.zIndex = i;
+    const escuro = ["#000000", "#0000EE", "#551A8B", "#15174A"].includes(hex);
+    t.style.background = hex;
+    t.style.color = escuro ? "#fff" : "#000";
+    t.innerHTML = `<b>${nome}</b>${hex}<small>${origem}</small>`;
+    leque.append(t);
+  });
+  const pintor = document.getElementById("pintor");
+  pintor.append(pe({ largura: 62, humor: "feliz", chapeu: true, olhar: [1, -0.6] }));
+  pronto();
+</script>
+</body>
+</html>

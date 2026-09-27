@@ -1,0 +1,49 @@
+/* No papel, a página vira um pôster do Pé. */
+
+@page { size: A4 portrait; margin: 18mm; }
+
+:root, :root.ato-2 {
+  --papel: #fff;
+  --tinta: #000;
+  --olho: #fff;
+  --tinta-pupila: #000;
+  --link: #0000ee;
+}
+
+body { background: #fff; color: #000; }
+
+.skip, .topo, .folha, .sumario, #anuncio { display: none !important; }
+
+.poster {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 250mm;
+  font-family: var(--display);
+}
+.poster-pe .pe { width: 120mm; color: #000; }
+.poster-pe .pe .olho-branco { fill: #fff; }
+.poster-pe { display: flex; align-items: flex-start; gap: 6mm; }
+.poster-pe .ast { width: 40mm; }
+.poster-pe .ast-bracos { fill: #000; animation: none; }
+.poster-pe .ast-pupila { fill: #000; }
+.poster-pe .ast-sobrancelha { stroke: #000; }
+.poster-titulo {
+  font-size: 64pt;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.poster-linha {
+  font-family: var(--texto);
+  font-size: 12pt;
+  margin: 6mm 0 0;
+}
+.poster-rodape {
+  font-style: italic;
+  font-size: 14pt;
+  border-top: 0.5pt solid #000;
+  padding-top: 3mm;
+  margin: 0;
+}

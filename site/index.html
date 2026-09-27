@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <!-- *oi, você que lê código-fonte. aqui embaixo não tem nada de interessante. -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>não feche esta aba</title>
+  <meta name="description" content="Um jogo de quebra-cabeça em que o controle é o seu navegador. Ctrl+F, zoom, botão Voltar, console, modo escuro, imprimir. Ajude o Pé a sair desta aba.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#15174A" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="não feche esta aba">
+  <meta property="og:description" content="Um jogo em que o controle é o seu navegador.">
+  <meta property="og:image" content="https://kitsuneislife.github.io/lover/assets/social.png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" id="favicon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" href="assets/fonts/bodoni-moda.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/atkinson-next.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <!-- *a senha do porão é marmelada. não conta pro Pé. -->
+  <a class="skip" href="#palco">Pular para o jogo</a>
+
+  <header class="topo">
+    <span class="marca" translate="no">não feche esta aba</span>
+    <nav class="topo-acoes" aria-label="Opções">
+      <button type="button" id="som" class="texto-botao" aria-pressed="true">Som ligado</button>
+      <button type="button" id="ir-sumario" class="texto-botao">Sumário</button>
+    </nav>
+  </header>
+
+  <div class="folha">
+    <aside class="margem" aria-label="Pé, o pé-de-mosca">
+      <div class="pe-casa">
+        <div id="pe-casa"></div>
+        <div id="ast-casa" class="ast-casa" hidden></div>
+      </div>
+    </aside>
+
+    <main id="palco" class="palco" tabindex="-1">
+      <noscript>
+        <p class="fala">O Pé mora no JavaScript. Ative o JavaScript para jogar.</p>
+      </noscript>
+    </main>
+  </div>
+
+  <nav id="sumario" class="sumario" aria-labelledby="sumario-titulo" hidden>
+    <h2 id="sumario-titulo">Sumário</h2>
+    <div id="sumario-lista" class="sumario-lista"></div>
+  </nav>
+
+  <div id="anuncio" class="so-leitor" aria-live="polite"></div>
+
+  <section class="poster" aria-hidden="true">
+    <div class="poster-pe" id="poster-pe"></div>
+    <p class="poster-titulo">¶ esteve aqui.</p>
+    <p class="poster-linha" id="poster-linha"></p>
+    <p class="poster-rodape">não feche esta aba</p>
+  </section>
+</body>
+</html>
