@@ -1,7 +1,7 @@
 // Service worker: guarda o jogo inteiro na primeira visita.
 // É ele que deixa o § 14 (sem internet) funcionar.
 
-const VERSAO = "nfea-v1";
+const VERSAO = "nfea-v3";
 const ARQUIVOS = [
   "./",
   "./index.html",
@@ -17,6 +17,9 @@ const ARQUIVOS = [
   "./js/pe.js",
   "./js/fx.js",
   "./js/store.js",
+  "./js/asterisco.js",
+  "./js/util.js",
+  "./404.html",
   "./js/fases/01-tinta-branca.js",
   "./js/fases/02-esconderijo.js",
   "./js/fases/03-agulha.js",
@@ -33,6 +36,22 @@ const ARQUIVOS = [
   "./js/fases/14-sem-rede.js",
   "./js/fases/15-papel.js",
   "./js/fases/16-saida.js",
+  "./js/fases/17-nome.js",
+  "./js/fases/18-estatua.js",
+  "./js/fases/19-parede.js",
+  "./js/fases/20-konami.js",
+  "./js/fases/21-poco.js",
+  "./js/fases/22-voz.js",
+  "./js/fases/23-pichacao.js",
+  "./js/fases/24-fome.js",
+  "./js/fases/25-medo-de-seta.js",
+  "./js/fases/26-marmota.js",
+  "./js/fases/27-pequenininho.js",
+  "./js/fases/28-porao.js",
+  "./js/fases/29-lugar-nenhum.js",
+  "./js/fases/30-janela-flutuante.js",
+  "./js/fases/31-mudanca.js",
+  "./js/fases/32-chefao.js",
   "./js/fases/index.js",
 ];
 
@@ -51,7 +70,10 @@ self.addEventListener("activate", (e) => {
 // Rede primeiro, para quem publica ver as mudanças; cache quando a rede falha.
 self.addEventListener("fetch", (e) => {
   const req = e.request;
-  if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== "GET" || url.origin !== location.origin) return;
+  // a sonda do § 14 precisa ir à rede de verdade; sem cache, sem plano B
+  if (url.pathname.endsWith("/sonda.txt")) return;
   e.respondWith(
     fetch(req)
       .then((res) => {

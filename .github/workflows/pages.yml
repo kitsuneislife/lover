@@ -26,7 +26,7 @@ jobs:
       - name: Montar pasta do site
         run: |
           mkdir _site
-          cp -r index.html manifest.webmanifest sw.js .nojekyll css js assets _site/
+          cp -r index.html 404.html sonda.txt manifest.webmanifest sw.js .nojekyll css js assets _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

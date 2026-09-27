@@ -117,6 +117,8 @@ export function criarPe(casa) {
       if (ms) humorTimer = setTimeout(() => svg.removeAttribute("data-humor"), ms);
     },
     pular() { animar("pula"); },
+    // entrada no avesso: cai de ponta-cabeça e desvira
+    cambalhota() { animar("cambalhota"); },
     encolher() { animar("encolhe"); },
     sumir(sim) {
       if (sim) svg.setAttribute("data-sumido", "");

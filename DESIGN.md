@@ -100,3 +100,49 @@ de seção e primo do ¶.
 | 2026-09-27 | Paleta = cores padrão do navegador | O assunto do jogo é o navegador |
 | 2026-09-27 | Fontes hospedadas no repo | A fase offline precisa funcionar sem rede |
 | 2026-09-27 | Dicas como notas de rodapé | Estrutura tipográfica que o jogador já entende |
+
+# Ato II: o avesso
+
+## A passagem
+
+No fim do Ato I, o título diz "a aba está vazia." e o ponto final começa a tremer. É o ponto que o Pé
+perdeu no § 7. Quem clica nele derruba a página inteira: cada palavra cai com gravidade, o ponto vira um
+buraco e o azul de link (`#0000EE`) toma a tela a partir dele. O Pé sai do buraco de ponta-cabeça.
+
+## O avesso tem outra paleta
+
+O Ato I é a página. O Ato II é o que fica atrás dela, pintado com a cor de um link não visitado.
+
+| Token | Ato I | Ato II |
+|---|---|---|
+| papel | `#FFFFFF` | `#0000EE` |
+| tinta | `#000000` | `#FFFFFF` |
+| link | `#0000EE` | `#FFFF00` |
+| seleção | `#B4D5FE` | `#FFFF00` com texto azul |
+
+## O Asterisco
+
+Um * amarelo de um olho só, com sobrancelha. Mora nas notas de rodapé e cuida das letras miúdas.
+Fala sempre com um * na frente, como nota de rodapé. No Ato II as dicas são dele: `*`, `**`, `***`,
+no lugar de ¹ ² ³. Ele é o vilão, mas só quer que alguém leia as notas de rodapé.
+
+## As 16 páginas
+
+| § | Nome | Recurso |
+|---|---|---|
+| 17 | Nome verdadeiro | digitar o caractere ¶ (Alt+0182, Option+7) |
+| 18 | Estátua | não tocar em nada por 40 s enquanto o Asterisco provoca |
+| 19 | A parede | apagar um `<div>` pelo DevTools |
+| 20 | Código de trapaça | código Konami (ou deslizes no celular) |
+| 21 | O poço | uma página de 300 mil pixels, tecla End |
+| 22 | Voz | `speechSynthesis`: o Pé fala a senha em voz alta |
+| 23 | Pichação | editar o texto da página (`document.designMode`) |
+| 24 | Fome | arrastar um arquivo para dentro da página |
+| 25 | Medo de seta | tirar o mouse da janela |
+| 26 | Dia da marmota | recarregar a página (F5) várias vezes |
+| 27 | Pequenininho | ler um código no favicon |
+| 28 | Porão do código | comentário escondido no código-fonte (Ctrl+U) |
+| 29 | Lugar nenhum | visitar uma URL que não existe: o `404.html` é parte do jogo |
+| 30 | Janela flutuante | Picture-in-Picture de um vídeo desenhado em canvas |
+| 31 | Mudança | levar a janela para o canto da tela (`screenX`, `screenY`) |
+| 32 | O chefão | seis truques do Ato I em 100 segundos, contra o relógio |

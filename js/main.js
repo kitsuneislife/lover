@@ -1,9 +1,10 @@
-// Motor do jogo: telas, fases, dicas, abas e salvamento.
+// Motor do jogo: telas, fases, dicas, abas, os dois atos e o salvamento.
 
 import { criarPe, desenharPe } from "./pe.js";
-import { som, vibrar, desenharFavicon, titulo, cumprimentarConsole } from "./fx.js";
+import { criarAsterisco, desenharAsterisco } from "./asterisco.js";
+import { som, vibrar, desenharFavicon, faviconBruto, titulo, cumprimentarConsole } from "./fx.js";
 import { carregarEstado, salvarEstado, zerarEstado } from "./store.js";
-import { FASES } from "./fases/index.js";
+import { FASES, ATO2 } from "./fases/index.js";
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 
@@ -12,30 +13,53 @@ const anuncio = $("#anuncio");
 const sumario = $("#sumario");
 const reduzido = matchMedia("(prefers-reduced-motion: reduce)");
 const toque = matchMedia("(pointer: coarse)").matches;
+const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 
 let estado = carregarEstado();
 let pe = null;
+let ast = null;
 let faseAtual = null; // { indice, limpezas, token }
+let faviconOcupado = false;
 
 function salvar() { salvarEstado(estado); }
 
-// ---------- cores do favicon acompanham o tema ----------
+function lembrarVendo(i) {
+  try { sessionStorage.setItem("nfea.vendo", String(i)); } catch { /* sem sessão */ }
+}
+function lerVendo() {
+  try { return Number(sessionStorage.getItem("nfea.vendo") ?? NaN); } catch { return NaN; }
+}
+
+// ---------- tema e favicon ----------
 
 function coresTema() {
   const s = getComputedStyle(document.documentElement);
   return { cor: s.getPropertyValue("--tinta").trim() || "#000", fundo: s.getPropertyValue("--papel").trim() || "#fff" };
 }
 function favicon(olhos = "abertos") {
+  if (faviconOcupado) return;
   desenharFavicon({ olhos, ...coresTema() });
 }
+
+function aplicarAto(n) {
+  const raiz = document.documentElement;
+  raiz.classList.toggle("ato-2", n === 2);
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+    m.content = n === 2 ? "#0000EE" : m.media.includes("dark") ? "#15174A" : "#FFFFFF";
+  });
+  ast?.mostrar(n === 2);
+  favicon();
+}
+
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => favicon());
 document.addEventListener("visibilitychange", () => {
-  if (estado.fechouEm) return;
+  if (estado.fechouEm && !estado.ato2) return;
   favicon(document.hidden ? "fechados" : "abertos");
   pe?.humor(document.hidden ? "dormindo" : null);
 });
 
 // ---------- falas digitadas ----------
+// Uma fala que começa com "*" é do Asterisco.
 
 function textoPuro(html) {
   const t = document.createElement("template");
@@ -47,7 +71,13 @@ function anunciar(html) {
   anuncio.textContent = textoPuro(html);
 }
 
-// Digita cada fala letra por letra. Clique na área das falas mostra tudo de uma vez.
+function prepararFala(html) {
+  const doAst = html.startsWith("*");
+  const corpo = doAst ? html.slice(1) : html;
+  const final = doAst ? `<span class="ast-marca" aria-hidden="true">*</span>${corpo}` : corpo;
+  return { doAst, corpo, final };
+}
+
 function digitar(container, falas, token) {
   return new Promise((resolve) => {
     let pressa = reduzido.matches;
@@ -63,15 +93,16 @@ function digitar(container, falas, token) {
     const proxima = () => {
       if (token.cancelado) return fim();
       if (i >= falas.length) return fim();
-      const html = falas[i++];
+      const { doAst, corpo, final } = prepararFala(falas[i++]);
       const p = document.createElement("p");
-      p.className = "fala";
+      p.className = doAst ? "fala fala-ast" : "fala";
       p.setAttribute("aria-hidden", "true");
       container.append(p);
-      anunciar(html);
-      const texto = textoPuro(html);
+      anunciar((doAst ? "Asterisco: " : "") + corpo);
+      if (doAst) ast?.falar();
+      const texto = textoPuro(corpo);
       if (pressa) {
-        p.innerHTML = html;
+        p.innerHTML = final;
         p.removeAttribute("aria-hidden");
         return proxima();
       }
@@ -81,12 +112,12 @@ function digitar(container, falas, token) {
         if (token.cancelado) return fim();
         if (pressa || n >= texto.length) {
           p.classList.remove("digitando");
-          p.innerHTML = html;
+          p.innerHTML = final;
           p.removeAttribute("aria-hidden");
           return setTimeout(proxima, pressa ? 0 : 380);
         }
         const c = texto[n++];
-        p.textContent = texto.slice(0, n);
+        p.textContent = (doAst ? "*" : "") + texto.slice(0, n);
         if (n % 3 === 0 && c !== " ") som.tecla();
         const pausa = ".?!".includes(c) ? 260 : ",:".includes(c) ? 120 : 22;
         setTimeout(passo, pausa);
@@ -99,10 +130,8 @@ function digitar(container, falas, token) {
 
 // ---------- abas: quem chegou primeiro é a anfitriã ----------
 
-const canalOk = "BroadcastChannel" in window;
-const canal = canalOk ? new BroadcastChannel("nfea") : null;
+const canal = "BroadcastChannel" in window ? new BroadcastChannel("nfea") : null;
 const ouvintesCanal = new Set();
-let souConvidada = false;
 
 function perguntarSeHaAnfitria() {
   if (!canal) return Promise.resolve(false);
@@ -138,11 +167,13 @@ function criarContexto(indice, area, falasEl, token) {
   const ctx = {
     palco: area,
     pe,
+    ast,
     som,
     titulo,
     toque,
     estado,
     salvar,
+    reduzido: reduzido.matches,
     canal: canal && {
       enviar: (msg) => canal.postMessage(msg),
       ouvir(fn) { ouvintesCanal.add(fn); limpezas.push(() => ouvintesCanal.delete(fn)); },
@@ -162,16 +193,23 @@ function criarContexto(indice, area, falasEl, token) {
       return t;
     },
     aoSair(fn) { limpezas.push(fn); },
-    // fala nova do Pé no meio da fase (reações)
+    // a fase assume o favicon; ao sair, o Pé volta para lá
+    favicon(svg) {
+      faviconOcupado = true;
+      faviconBruto(svg);
+      if (!limpezas.includes(liberarFavicon)) limpezas.push(liberarFavicon);
+    },
+    // reação no meio da fase; começa com "*" quando é o Asterisco falando
     dizer(html, { humor } = {}) {
       if (token.cancelado) return;
-      const antigo = falasEl.querySelector(".fala.reacao");
-      antigo?.remove();
+      falasEl.querySelector(".fala.reacao")?.remove();
+      const { doAst, final, corpo } = prepararFala(html);
       const p = document.createElement("p");
-      p.className = "fala reacao";
-      p.innerHTML = html;
+      p.className = "fala reacao" + (doAst ? " fala-ast" : "");
+      p.innerHTML = final;
       falasEl.append(p);
-      anunciar(html);
+      anunciar((doAst ? "Asterisco: " : "") + corpo);
+      if (doAst) ast?.rir();
       if (humor) pe.humor(humor, 1800);
       if (humor === "triste") som.erro();
     },
@@ -185,6 +223,11 @@ function criarContexto(indice, area, falasEl, token) {
   return { ctx, limpezas };
 }
 
+function liberarFavicon() {
+  faviconOcupado = false;
+  favicon();
+}
+
 // ---------- telas ----------
 
 function limparFase() {
@@ -196,10 +239,12 @@ function limparFase() {
   faseAtual = null;
   titulo.forcar(null);
   pe?.sumir(false);
+  ast?.humor(null);
 }
 
 function telaAbertura() {
   limparFase();
+  aplicarAto(1);
   sumario.hidden = true;
   titulo.definir(titulo.base);
   palco.innerHTML = `
@@ -219,8 +264,7 @@ function telaAbertura() {
     "só que desta vez fiquei preso dentro desta aba. a saída passa por aqueles botões do navegador que ninguém aperta.",
     "me ajuda?",
   ], token).then(() => {
-    const depois = $(".depois", palco);
-    depois.hidden = false;
+    $(".depois", palco).hidden = false;
     $("#comecar").addEventListener("click", () => {
       som.pulo();
       estado.comecou = estado.comecou || Date.now();
@@ -230,29 +274,40 @@ function telaAbertura() {
   });
 }
 
+function itemSumario(f, i) {
+  const li = document.createElement("li");
+  const num = `<span class="num">§ ${i + 1}</span>`;
+  if (i > estado.fase) {
+    li.innerHTML = `<span class="trancado">${num}${"·".repeat(3)}</span>`;
+    return li;
+  }
+  const a = document.createElement("a");
+  a.href = "#palco";
+  a.innerHTML = `${num}${f.nome}`;
+  if (estado.feitas[f.id]) a.classList.add("feito");
+  if (estado.puladas[f.id]) a.classList.add("pulado");
+  if (faseAtual?.indice === i) a.setAttribute("aria-current", "page");
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    irPara(i);
+  });
+  li.append(a);
+  return li;
+}
+
 function marcarSumario() {
-  const ol = $("#sumario-lista");
-  ol.replaceChildren(
-    ...FASES.map((f, i) => {
-      const li = document.createElement("li");
-      const num = `<span class="num">§ ${i + 1}</span>`;
-      const liberada = i <= estado.fase;
-      if (!liberada) {
-        li.innerHTML = `<span class="trancado">${num}${"·".repeat(3)}</span>`;
-        return li;
-      }
-      const b = document.createElement("a");
-      b.href = "#palco";
-      b.innerHTML = `${num}${f.nome}`;
-      if (estado.feitas[f.id]) b.classList.add("feito");
-      if (estado.puladas[f.id]) b.classList.add("pulado");
-      if (faseAtual?.indice === i) b.setAttribute("aria-current", "page");
-      b.addEventListener("click", (e) => {
-        e.preventDefault();
-        irPara(i);
-      });
-      li.append(b);
-      return li;
+  const grupos = [["Ato I", 0, ATO2]];
+  if (estado.ato2) grupos.push(["Ato II", ATO2, FASES.length]);
+  $("#sumario-lista").replaceChildren(
+    ...grupos.map(([nome, de, ate]) => {
+      const g = document.createElement("section");
+      g.className = "sumario-grupo";
+      const h = document.createElement("h3");
+      h.textContent = nome;
+      const ol = document.createElement("ol");
+      ol.append(...FASES.slice(de, ate).map((f, k) => itemSumario(f, de + k)));
+      g.append(h, ol);
+      return g;
     })
   );
   sumario.hidden = false;
@@ -260,30 +315,33 @@ function marcarSumario() {
 
 async function irPara(indice) {
   limparFase();
-  if (indice >= FASES.length) indice = FASES.length - 1;
+  indice = Math.max(0, Math.min(indice, FASES.length - 1));
+  if (indice >= ATO2 && !estado.ato2) indice = ATO2 - 1;
   const fase = FASES[indice];
   const token = { cancelado: false };
   faseAtual = { indice, limpezas: [], token, timerDicas: 0 };
+  lembrarVendo(indice);
+  aplicarAto(indice >= ATO2 ? 2 : 1);
 
   titulo.definir(`¶ § ${indice + 1}: ${fase.nome}`);
   pe.chapeu(estado.chapeu);
   pe.humor(null);
+  palco.classList.remove("fim");
   palco.innerHTML = `
     <h1 class="secao">§ ${indice + 1}</h1>
     <p class="secao-nome">${fase.nome}</p>
     <div class="falas"></div>
+    ${fase.dicasAntes ? '<footer class="rodape rodape-antes" hidden><div class="rodape-linha"></div><ol class="notas"></ol></footer>' : ""}
     <div class="puzzle"></div>
     <div class="depois"></div>
-    <footer class="rodape" hidden>
-      <div class="rodape-linha"></div>
-      <ol class="notas"></ol>
-    </footer>`;
+    ${fase.dicasAntes ? "" : '<footer class="rodape" hidden><div class="rodape-linha"></div><ol class="notas"></ol></footer>'}`;
   palco.focus({ preventScroll: true });
-  scrollTo({ top: 0, behavior: reduzido.matches ? "auto" : "smooth" });
+  scrollTo({ top: 0, behavior: "auto" });
   marcarSumario();
 
   const falasEl = $(".falas", palco);
-  await digitar(falasEl, fase.falas, token);
+  const falas = typeof fase.falas === "function" ? fase.falas(estado) : fase.falas;
+  await digitar(falasEl, falas, token);
   if (token.cancelado) return;
 
   const area = $(".puzzle", palco);
@@ -299,11 +357,16 @@ async function irPara(indice) {
   montarDicas(fase, indice, token);
 }
 
+function podePular(indice) {
+  return indice !== ATO2 - 1 && indice !== FASES.length - 1;
+}
+
 function montarDicas(fase, indice, token) {
   const rodape = $(".rodape", palco);
   const linha = $(".rodape-linha", rodape);
   const notas = $(".notas", rodape);
-  const sup = ["¹", "²", "³", "⁴"];
+  const doAst = indice >= ATO2;
+  const marcas = doAst ? ["*", "**", "***", "****"] : ["¹", "²", "³", "⁴"];
   const dicas = fase.dicas || [];
   const semCelular = toque && fase.celular === false;
   let proxima = 0;
@@ -326,15 +389,18 @@ function montarDicas(fase, indice, token) {
       pular.disabled = false;
       return;
     }
-    botao.innerHTML = `Ver nota <sup>${sup[proxima]}</sup>`;
+    botao.innerHTML = doAst
+      ? `Perguntar ao Asterisco <sup>${marcas[proxima]}</sup>`
+      : `Ver nota <sup>${marcas[proxima]}</sup>`;
   };
 
   botao.addEventListener("click", () => {
     const li = document.createElement("li");
-    li.className = "nota";
-    li.innerHTML = `<sup>${sup[proxima]}</sup> ${dicas[proxima]}`;
+    li.className = "nota" + (doAst ? " nota-ast" : "");
+    li.innerHTML = `<sup>${marcas[proxima]}</sup> ${dicas[proxima]}`;
     notas.append(li);
     anunciar(dicas[proxima]);
+    if (doAst) ast?.falar();
     proxima++;
     botao.disabled = true;
     atualizar();
@@ -348,7 +414,7 @@ function montarDicas(fase, indice, token) {
   };
 
   linha.append(botao);
-  if (indice < FASES.length - 1) linha.append(pular);
+  if (podePular(indice)) linha.append(pular);
   if (semCelular) {
     const aviso = document.createElement("p");
     aviso.className = "aviso-celular";
@@ -356,8 +422,8 @@ function montarDicas(fase, indice, token) {
     rodape.prepend(aviso);
   }
   atualizar();
-  if (dicas.length) liberarEm(estado.feitas[fase.id] ? 0 : 15000);
-  setTimeout(() => { if (!token.cancelado) pular.disabled = false; }, 150000);
+  if (dicas.length) liberarEm(estado.feitas[fase.id] ? 0 : doAst ? 20000 : 15000);
+  setTimeout(() => { if (!token.cancelado) pular.disabled = false; }, doAst ? 240000 : 150000);
   rodape.hidden = false;
 }
 
@@ -382,17 +448,17 @@ async function concluirFase(indice, falas, falasEl, token) {
   const vitoria = falas || fase.vitoria || ["pronto."];
   await digitar(falasEl, vitoria, token);
   if (token.cancelado) return;
-  if (indice >= FASES.length - 1) return;
 
   const depois = $(".depois", palco);
+  if (indice >= FASES.length - 1) return botoesDoFim(depois);
+
   const b = document.createElement("button");
   b.type = "button";
   b.className = "acao";
   b.textContent = `Virar para o § ${indice + 2}`;
   b.addEventListener("click", () => { som.pulo(); irPara(indice + 1); });
   depois.replaceChildren(b);
-  if (!primeiraVez) return;
-  b.focus({ preventScroll: true });
+  if (primeiraVez) b.focus({ preventScroll: true });
 }
 
 function pularFase(indice) {
@@ -403,13 +469,41 @@ function pularFase(indice) {
   pe.encolher();
   pe.humor("triste", 1600);
   som.erro();
-  irPara(Math.min(indice + 1, FASES.length - 1));
+  if (indice >= ATO2) ast?.rir();
+  irPara(indice + 1);
+}
+
+function botoesDoFim(depois) {
+  const imprimir = document.createElement("button");
+  imprimir.type = "button";
+  imprimir.className = "acao";
+  imprimir.textContent = "Imprimir o pôster";
+  imprimir.addEventListener("click", () => print());
+
+  const deNovo = document.createElement("button");
+  deNovo.type = "button";
+  deNovo.className = "texto-botao";
+  deNovo.textContent = "Jogar de novo";
+  let armado = false;
+  deNovo.addEventListener("click", () => {
+    if (!armado) {
+      armado = true;
+      deNovo.textContent = "Clique de novo para apagar o progresso";
+      setTimeout(() => { armado = false; deNovo.textContent = "Jogar de novo"; }, 5000);
+      return;
+    }
+    estado = zerarEstado();
+    try { sessionStorage.clear(); } catch { /* idem */ }
+    location.reload();
+  });
+  depois.replaceChildren(imprimir, deNovo);
 }
 
 // ---------- aba convidada ----------
 
 function telaConvidada() {
   sumario.hidden = true;
+  aplicarAto(estado.ato2 ? 2 : 1);
   titulo.definir("¶ a outra aba");
   pe.sumir(true);
   palco.innerHTML = `
@@ -417,9 +511,7 @@ function telaConvidada() {
     <div class="falas"></div>`;
   const token = { cancelado: false };
   const falasEl = $(".falas", palco);
-  digitar(falasEl, [
-    "o Pé mora na primeira aba que você abriu. esta aqui é visita.",
-  ], token);
+  digitar(falasEl, ["o Pé mora na primeira aba que você abriu. esta aqui é visita."], token);
 
   canal.addEventListener("message", (e) => {
     if (e.data?.t === "pe-vai") {
@@ -438,7 +530,7 @@ function telaConvidada() {
   addEventListener("pagehide", () => canal.postMessage({ t: "convidada-saiu" }));
 }
 
-// ---------- o fim ----------
+// ---------- fim do Ato I e a passagem para o avesso ----------
 
 function formatarDuracao(ms) {
   const min = Math.max(1, Math.round(ms / 60000));
@@ -451,53 +543,162 @@ function formatarDuracao(ms) {
 
 function telaFim() {
   limparFase();
+  aplicarAto(1);
   pe.sumir(true);
-  favicon("vazio");
-  titulo.definir(" ");
-  document.title = " ";
-  const feitas = Object.keys(estado.feitas).length;
-  const puladas = Object.keys(estado.puladas).length;
+  faviconOcupado = false;
+  desenharFavicon({ olhos: "vazio", ...coresTema() });
+  faviconOcupado = true;
+  titulo.definir(" ");
+  const feitas = FASES.slice(0, ATO2).filter((f) => estado.feitas[f.id]).length;
+  const puladas = FASES.slice(0, ATO2).filter((f) => estado.puladas[f.id]).length;
   const quando = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeStyle: "short" }).format(estado.fechouEm);
   const tempo = formatarDuracao(estado.fechouEm - (estado.comecou || estado.fechouEm));
   palco.classList.add("fim");
   palco.innerHTML = `
-    <h1 class="titulo-jogo">a aba está vazia.</h1>
+    <h1 class="titulo-jogo">a aba está vazia<button type="button" class="ponto-final" aria-label="Ponto final">.</button></h1>
     <div class="falas"></div>
     <dl class="estatisticas" hidden>
       <dt>Saiu em</dt><dd>${quando}</dd>
       <dt>Tempo junto</dt><dd>${tempo}</dd>
-      <dt>Páginas resolvidas</dt><dd>${feitas} de ${FASES.length}</dd>
+      <dt>Páginas resolvidas</dt><dd>${feitas} de ${ATO2}</dd>
       <dt>Páginas puladas</dt><dd>${puladas}</dd>
     </dl>
     <div class="depois" hidden>
       <button type="button" class="acao" id="imprimir">Imprimir o pôster</button>
-      <button type="button" class="texto-botao" id="de-novo">Jogar de novo</button>
     </div>`;
-  marcarSumario();
   sumario.hidden = true;
   const token = { cancelado: false };
+  faseAtual = { indice: -1, limpezas: [], token };
+  const ponto = $(".ponto-final", palco);
+  ponto.addEventListener("click", () => atravessar(ponto), { once: true });
+
   digitar($(".falas", palco), [
     "o Pé saiu quando você fechou a aba. ele deixou um bilhete no fim do parágrafo:",
     "“obrigado por ler letra miúda, por olhar para outro lado quando eu pedi e por voltar. agora eu moro em qualquer texto que você escrever. confere o fim dos seus parágrafos de vez em quando.”",
   ], token).then(() => {
+    if (token.cancelado) return;
     $(".estatisticas", palco).hidden = false;
     $(".depois", palco).hidden = false;
     $("#imprimir").addEventListener("click", () => print());
-    const deNovo = $("#de-novo");
-    let armado = false;
-    deNovo.addEventListener("click", () => {
-      if (!armado) {
-        armado = true;
-        deNovo.textContent = "Clique de novo para apagar o progresso";
-        setTimeout(() => { armado = false; deNovo.textContent = "Jogar de novo"; }, 5000);
-        return;
-      }
-      estado = zerarEstado();
-      palco.classList.remove("fim");
-      pe.sumir(false);
-      favicon();
-      telaAbertura();
+    setTimeout(() => { if (!token.cancelado) ponto.classList.add("tremendo"); }, 4000);
+    setTimeout(() => {
+      if (token.cancelado) return;
+      const p = document.createElement("p");
+      p.className = "aviso-celular sussurro";
+      p.textContent = "O ponto final do título está tremendo.";
+      $(".depois", palco).after(p);
+    }, 15000);
+  });
+}
+
+// Troca cada palavra por um <span> para ela poder cair sozinha.
+function quebrarEmPalavras(raiz) {
+  const nos = [];
+  const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT);
+  while (w.nextNode()) if (w.currentNode.textContent.trim()) nos.push(w.currentNode);
+  const spans = [];
+  for (const no of nos) {
+    const frag = document.createDocumentFragment();
+    for (const parte of no.textContent.split(/(\s+)/)) {
+      if (!parte) continue;
+      if (/^\s+$/.test(parte)) { frag.append(parte); continue; }
+      const s = document.createElement("span");
+      s.className = "caindo";
+      s.textContent = parte;
+      frag.append(s);
+      spans.push(s);
+    }
+    no.replaceWith(frag);
+  }
+  return spans;
+}
+
+async function atravessar(ponto) {
+  faseAtual.token.cancelado = true;
+  const r = ponto.getBoundingClientRect();
+  const x = r.left + r.width / 2;
+  const y = r.top + r.height * 0.75;
+  som.portal();
+  vibrar([30, 60, 30, 60, 160]);
+
+  if (!reduzido.matches) {
+    ponto.style.visibility = "hidden";
+    const pedacos = [
+      ...quebrarEmPalavras(palco),
+      ...palco.querySelectorAll(".acao, .texto-botao"),
+    ];
+    pedacos.forEach((s) => {
+      const q = s.getBoundingClientRect();
+      const dx = (x - q.left) * (0.3 + Math.random() * 0.4);
+      const cair = innerHeight - q.top + 200 + Math.random() * 300;
+      s.animate(
+        [
+          { transform: "translate(0, 0) rotate(0deg)" },
+          { transform: `translate(${dx * 0.2}px, -${20 + Math.random() * 40}px) rotate(${(Math.random() - 0.5) * 20}deg)`, offset: 0.18 },
+          { transform: `translate(${dx}px, ${cair}px) rotate(${(Math.random() - 0.5) * 540}deg)` },
+        ],
+        { duration: 900 + Math.random() * 700, delay: Math.random() * 350, easing: "cubic-bezier(.5,0,.9,.5)", fill: "forwards" }
+      );
     });
+    await espera(1300);
+  }
+
+  const buraco = document.createElement("div");
+  buraco.className = "buraco";
+  document.body.append(buraco);
+  const raio = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 40;
+  await buraco.animate(
+    [{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${raio}px at ${x}px ${y}px)` }],
+    { duration: reduzido.matches ? 1 : 950, easing: "cubic-bezier(.75,0,.25,1)", fill: "forwards" }
+  ).finished;
+
+  estado.ato2 = true;
+  estado.fase = Math.max(estado.fase, ATO2);
+  estado.entrouAto2 = Date.now();
+  salvar();
+  faviconOcupado = false;
+  telaAvesso();
+  await espera(60);
+  await buraco.animate([{ opacity: 1 }, { opacity: 0 }], { duration: reduzido.matches ? 1 : 500, fill: "forwards" }).finished;
+  buraco.remove();
+}
+
+function telaAvesso() {
+  limparFase();
+  palco.classList.remove("fim");
+  aplicarAto(2);
+  sumario.hidden = true;
+  titulo.definir("¶ o avesso");
+  pe.sumir(false);
+  pe.cambalhota();
+  palco.innerHTML = `
+    <h1 class="titulo-jogo">o avesso.</h1>
+    <div class="falas"></div>
+    <div class="depois" hidden>
+      <button type="button" class="acao" id="entrar">Abrir o § ${ATO2 + 1}</button>
+    </div>`;
+  const token = { cancelado: false };
+  faseAtual = { indice: -1, limpezas: [], token };
+  ast.mostrar(false);
+  digitar($(".falas", palco), [
+    "caí pelo ponto final. achei que do outro lado ia ter o resto da internet.",
+    "mas do outro lado fica o avesso da aba, onde a página guarda o que esconde de você: o código, os endereços que não existem.",
+  ], token).then(async () => {
+    if (token.cancelado) return;
+    ast.mostrar(true);
+    ast.rir();
+    som.erro();
+    await digitar($(".falas", palco), [
+      "*com licença.",
+      "ah, não. esse é o Asterisco. ele mora nas notas de rodapé.",
+      "*e cuido das letras miúdas. vocês leram as do contrato lá atrás, eu vi.",
+      "*aqui são dezesseis páginas, mais difíceis que as de lá. se vocês passarem de todas, eu deixo o Pé ir embora.*",
+      "*condições se aplicam.",
+      "ele fala assim mesmo. vamos?",
+    ], token);
+    if (token.cancelado) return;
+    $(".depois", palco).hidden = false;
+    $("#entrar").addEventListener("click", () => { som.pulo(); irPara(ATO2); });
   });
 }
 
@@ -507,10 +708,13 @@ function prepararPoster() {
   const casa = $("#poster-pe");
   const svg = desenharPe();
   if (estado.chapeu) svg.setAttribute("data-chapeu", "");
+  const zerou = estado.feitas[FASES[FASES.length - 1].id];
   casa.replaceChildren(svg);
+  if (zerou) casa.append(desenharAsterisco());
   const data = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long" }).format(Date.now());
-  const feitas = Object.keys(estado.feitas).length;
-  $("#poster-linha").textContent = `Impresso em ${data}. Páginas resolvidas até aqui: ${feitas} de ${FASES.length}.`;
+  const feitas = FASES.filter((f) => estado.feitas[f.id]).length;
+  $(".poster-titulo").textContent = zerou ? "¶ e * estiveram aqui." : "¶ esteve aqui.";
+  $("#poster-linha").textContent = `Impresso em ${data}. Páginas resolvidas até aqui: ${feitas} de ${estado.ato2 ? FASES.length : ATO2}.`;
 }
 addEventListener("beforeprint", prepararPoster);
 
@@ -526,7 +730,8 @@ function ligarTopo() {
   b.addEventListener("click", () => { som.alternar(); pintar(); if (som.ligado) som.pulo(); });
   // botão, não link: um #sumario na URL entraria no histórico e atrapalharia o § 7
   $("#ir-sumario").addEventListener("click", () => {
-    if (sumario.hidden) marcarSumario();
+    if (!estado.comecou) return;
+    marcarSumario();
     sumario.scrollIntoView({ behavior: reduzido.matches ? "auto" : "smooth" });
     $("#sumario-lista a")?.focus({ preventScroll: true });
   });
@@ -536,23 +741,26 @@ function ligarTopo() {
 
 async function iniciar() {
   pe = criarPe($("#pe-casa"));
+  ast = criarAsterisco($("#ast-casa"));
+  ast.mostrar(false);
   favicon();
   ligarTopo();
   prepararPoster();
   cumprimentarConsole();
+  try { localStorage.setItem("nfea.base", new URL(".", location.href).pathname); } catch { /* idem */ }
 
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   }
 
-  if (estado.fechouEm) return telaFim();
+  if (estado.fechouEm && !estado.ato2) return telaFim();
 
-  souConvidada = await perguntarSeHaAnfitria();
-  if (souConvidada) return telaConvidada();
+  if (await perguntarSeHaAnfitria()) return telaConvidada();
   virarAnfitria();
 
   if (!estado.comecou) return telaAbertura();
-  irPara(Math.min(estado.fase, FASES.length - 1));
+  const vendo = lerVendo();
+  irPara(Number.isInteger(vendo) && vendo <= estado.fase ? vendo : estado.fase);
 }
 
 // para os testes automatizados e para quem gosta de fuçar
@@ -560,6 +768,7 @@ window.__nfea = {
   get estado() { return estado; },
   irPara: (i) => irPara(i),
   get fase() { return faseAtual?.indice; },
+  salvar,
 };
 
 iniciar();

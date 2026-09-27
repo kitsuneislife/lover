@@ -91,7 +91,7 @@ body {
   overflow-x: hidden;
 }
 
-::selection { background: var(--selecao); color: var(--tinta); }
+::selection { background: var(--selecao); color: var(--selecao-texto, var(--tinta)); }
 
 a { color: var(--link); text-underline-offset: 0.18em; }
 a:visited { color: var(--visitado); }
@@ -530,6 +530,282 @@ a:visited { color: var(--visitado); }
   .pe.pula, .pe.encolhe { animation: none; }
   .pe .palpebra, .pe[data-sumido] { transition: none; }
   .planta .atual { transition: none; }
+}
+
+/* ================= ATO II: o avesso ================= */
+
+:root.ato-2 {
+  --papel: #0000ee;
+  --tinta: #ffffff;
+  --tinta-2: #dfe3ff;
+  --tinta-3: #aab4ff;
+  --link: #ffff00;
+  --visitado: #ffc2f0;
+  --selecao: #ffff00;
+  --selecao-texto: #0000ee;
+  --marca-invisivel: #6c79ff;
+  --olho: #0000ee;
+  --tinta-pupila: #ffffff;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root.ato-2 { --papel: #0000b8; --olho: #0000b8; }
+}
+:root.ato-2 body { transition: background-color 600ms ease-out; }
+:root.ato-2 .tinta-branca { color: var(--papel); }
+
+/* a passagem: palavras caindo e o buraco azul */
+.ponto-final {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  display: inline-block;
+}
+.ponto-final.tremendo { animation: tremer 180ms steps(2) infinite; }
+@keyframes tremer {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(1px, -1px); }
+  100% { transform: translate(-1px, 1px); }
+}
+.caindo { display: inline-block; }
+.sussurro { font-style: italic; margin-top: 1.5rem; }
+.buraco {
+  position: fixed;
+  inset: 0;
+  background: #0000ee;
+  z-index: 40;
+  pointer-events: none;
+}
+.pe.cambalhota { animation: cambalhota 1100ms cubic-bezier(0.3, 1.4, 0.5, 1); }
+@keyframes cambalhota {
+  0% { transform: translateY(-120%) rotate(180deg); }
+  60% { transform: translateY(6%) rotate(-12deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+/* o Asterisco */
+.ast-casa {
+  position: absolute;
+  right: -2.3rem;
+  top: 4.6rem;
+  width: clamp(2.6rem, 6vw, 3.6rem);
+  transition: top 700ms cubic-bezier(0.3, 1.3, 0.5, 1), right 700ms cubic-bezier(0.3, 1.3, 0.5, 1), width 700ms ease;
+}
+.ast { width: 100%; height: auto; overflow: visible; display: block; }
+.ast-bracos { fill: var(--achado); animation: girar 24s linear infinite; transform-origin: center; transform-box: fill-box; }
+.ast-olho { fill: #ffffff; }
+.ast-pupila { fill: #0000ee; }
+.ast-sobrancelha { stroke: #0000ee; stroke-width: 4; stroke-linecap: round; }
+.ast.ast-fala { animation: ast-fala 480ms ease-out; }
+.ast.ast-ri .ast-bracos { animation: girar 0.6s linear 1; }
+.ast[data-humor="derrotado"] .ast-sobrancelha { transform: rotate(-18deg) translateY(3px); transform-box: fill-box; transform-origin: center; }
+@keyframes girar { to { transform: rotate(360deg); } }
+@keyframes ast-fala {
+  30% { transform: scale(1.18) rotate(-8deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+/* no fim ele senta no chapéu do Pé */
+.ast-casa.no-chapeu { top: -1.6rem; right: 1.1rem; width: 1.8rem; }
+@media (max-width: 44rem) {
+  .ast-casa { right: auto; left: 5.5rem; top: 1rem; }
+  .ast-casa.no-chapeu { left: 2rem; top: -1.2rem; }
+}
+
+.fala-ast { font-family: var(--display); font-style: italic; font-size: 1.2rem; color: var(--achado); }
+.fala-ast::after { content: none; }
+.ast-marca { font-weight: 800; margin-right: 0.15em; }
+.nota-ast { color: var(--achado); font-family: var(--display); font-style: italic; font-size: 1.05rem; }
+.nota-ast code, .fala code, .nota code { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-style: normal; font-size: 0.85em; background: color-mix(in srgb, var(--tinta) 14%, transparent); padding: 0.05em 0.3em; border-radius: 3px; overflow-wrap: anywhere; }
+
+.sumario-lista { display: grid; gap: 2rem; }
+.sumario-grupo h3 { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 1.1rem; margin: 0 0 0.6rem; color: var(--tinta-3); }
+
+.campo-grande input { font-size: 2rem; font-family: var(--display); }
+
+/* § estátua */
+.relogio {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(6rem, 22vw, 12rem);
+  line-height: 0.9;
+  margin: 0;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.tentacoes { position: relative; min-height: 6rem; }
+.mosca {
+  position: fixed;
+  top: 40%;
+  left: -3rem;
+  width: 2.6rem;
+  color: var(--tinta);
+  animation: voar 5s linear forwards;
+  z-index: 30;
+}
+@keyframes voar {
+  0% { transform: translate(0, 0) rotate(10deg); }
+  25% { transform: translate(30vw, -12vh) rotate(-20deg); }
+  50% { transform: translate(55vw, 8vh) rotate(15deg); }
+  75% { transform: translate(80vw, -6vh) rotate(-10deg); }
+  100% { transform: translate(115vw, 0) rotate(0); }
+}
+.nao-clique {
+  font: 800 1.3rem/1 var(--texto);
+  background: var(--achado);
+  color: #000;
+  border: 3px solid #000;
+  padding: 1rem 1.5rem;
+  border-radius: 999px;
+  cursor: pointer;
+  animation: balancar 0.9s ease-in-out infinite;
+}
+@keyframes balancar { 50% { transform: rotate(-4deg) scale(1.05); } }
+.tentacao-fixa { position: fixed; z-index: 30; background: #fff; color: #111; font: 400 0.95rem/1.4 system-ui, sans-serif; box-shadow: 0 8px 30px rgb(0 0 0 / 0.35); }
+.tentacao-fixa.cookies { left: 1rem; right: 1rem; bottom: 1rem; max-width: 40rem; margin: auto; padding: 1rem 1.25rem; border-radius: 10px; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.tentacao-fixa.cookies p { margin: 0; flex: 1 1 16rem; }
+.tentacao-fixa.cookies button { font: inherit; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #111; background: #111; color: #fff; cursor: pointer; }
+.tentacao-fixa.cookies button + button { background: #fff; color: #111; }
+.tentacao-fixa.aviso-falso { top: 1rem; right: 1rem; padding: 0.8rem 1rem; border-radius: 10px; display: grid; gap: 0.2rem; width: min(20rem, calc(100vw - 2rem)); }
+
+/* § parede */
+.cela { position: relative; width: min(20rem, 100%); aspect-ratio: 4 / 3; }
+.cela-pe { position: absolute; inset: 0; display: grid; place-items: center; }
+.cela-pe .pe { width: 5rem; color: var(--tinta); }
+.parede {
+  position: absolute;
+  inset: 0;
+  background-color: #b7412e;
+  background-image:
+    linear-gradient(#e8d9c4 2px, transparent 2px),
+    linear-gradient(90deg, #e8d9c4 2px, transparent 2px),
+    linear-gradient(90deg, #e8d9c4 2px, transparent 2px);
+  background-size: 100% 28px, 56px 56px, 56px 56px;
+  background-position: 0 0, 0 0, 28px 28px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 55% 100%, 53% 70%, 51% 100%, 0 100%);
+}
+.placa-parede { background: var(--achado); color: #000; font-family: var(--display); font-style: italic; padding: 0.3rem 0.8rem; transform: rotate(-4deg); }
+
+/* § konami */
+.fechadura { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.buraco-tecla {
+  width: 3rem; height: 3.4rem;
+  border: 2px dashed var(--tinta-3);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-family: var(--display); font-size: 1.8rem; font-weight: 700;
+}
+.buraco-tecla.cheio { border-style: solid; border-color: var(--achado); color: var(--achado); }
+.botoes-ba { display: flex; gap: 1rem; margin-top: 1.5rem; }
+.botoes-ba .acao { width: 4.5rem; height: 4.5rem; padding: 0; font-size: 1.5rem; }
+
+/* § poço */
+.poco {
+  position: relative;
+  border-left: 2px solid var(--tinta-3);
+  border-right: 2px solid var(--tinta-3);
+  width: min(12rem, 60%);
+  background: repeating-linear-gradient(180deg, transparent 0 60px, color-mix(in srgb, var(--tinta) 6%, transparent) 60px 62px);
+}
+.marca-poco { position: absolute; left: calc(100% + 0.75rem); font-family: var(--display); color: var(--tinta-3); white-space: nowrap; }
+.fundo-poco { position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem; text-align: center; }
+.chapeu-solto { width: 5rem; color: var(--tinta); }
+.profundimetro {
+  position: fixed;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  translate: -50% 0;
+  margin: 0;
+  background: var(--tinta);
+  color: var(--papel);
+  font-family: var(--display);
+  font-size: 1.4rem;
+  padding: 0.4rem 1.2rem;
+  border-radius: 999px;
+  z-index: 20;
+  max-width: calc(100vw - 2rem);
+  text-align: center;
+}
+.profundimetro[data-fala]::after { content: attr(data-fala); display: block; font-size: 0.9rem; font-style: italic; }
+
+/* § pichação */
+.pichacao {
+  font-family: var(--display);
+  font-weight: 900;
+  font-style: italic;
+  font-size: clamp(2.6rem, 10vw, 5rem);
+  line-height: 1;
+  color: var(--achado);
+  transform: rotate(-6deg);
+  text-shadow: 3px 3px 0 #ff2bd6;
+  margin: 2rem 0;
+  outline: none;
+}
+
+/* § fome */
+.boca {
+  width: min(18rem, 100%);
+  aspect-ratio: 2 / 1;
+  border: 3px dashed var(--tinta-3);
+  border-radius: 0 0 999px 999px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1rem;
+  transition: transform 200ms ease-out, border-color 200ms ease-out;
+}
+.boca.aberta { transform: scale(1.08); border-color: var(--achado); border-style: solid; }
+.boca.mastigando { animation: mastigar 0.25s ease-in-out 6; }
+@keyframes mastigar { 50% { transform: scaleY(0.7); } }
+.boca-texto { margin: 0; font-family: var(--display); font-style: italic; overflow-wrap: anywhere; }
+.escolher { margin-top: 1rem; }
+
+/* § medo de seta */
+.toca { min-height: 12rem; display: grid; align-content: center; }
+.toca-pe { display: flex; align-items: flex-end; gap: 0.75rem; animation: espiar 400ms cubic-bezier(0.3, 1.5, 0.5, 1); }
+.toca-pe .pe { width: 4.5rem; color: var(--tinta); }
+@keyframes espiar { from { transform: translateY(40%); opacity: 0; } }
+.placa-senha { background: var(--tinta); color: var(--papel); font-family: var(--display); font-size: 1.8rem; font-weight: 700; padding: 0.3rem 1rem; transform: rotate(3deg); }
+.toca-vazia { color: var(--tinta-3); font-style: italic; }
+
+/* § marmota */
+.manhas { font-family: var(--display); font-size: 2rem; }
+
+/* § pequenininho */
+.seta-cima { font-family: var(--display); font-size: 5rem; line-height: 1; margin: 0 0 1rem; animation: apontar 1.2s ease-in-out infinite; }
+@keyframes apontar { 50% { transform: translateY(-12px); } }
+
+/* § janela flutuante */
+.tela-pe { width: 100%; max-width: 30rem; height: auto; aspect-ratio: 16 / 9; background: #0000ee; border: 2px solid var(--tinta); display: block; }
+
+/* § mudança */
+.mapa-tela { position: relative; width: min(22rem, 100%); aspect-ratio: 16 / 9; border: 2px solid var(--tinta); }
+.mapa-casa { position: absolute; right: 0; bottom: 0; width: 45%; height: 55%; border: 2px dashed var(--achado); }
+.mapa-janela { position: absolute; background: color-mix(in srgb, var(--tinta) 25%, transparent); border: 2px solid var(--tinta); }
+.mapa-janela.certo { background: color-mix(in srgb, var(--achado) 50%, transparent); border-color: var(--achado); }
+.mapa-status { font-family: var(--display); font-style: italic; font-size: 1.3rem; }
+
+/* § chefão */
+.arena .relogio { font-size: clamp(5rem, 18vw, 9rem); }
+.tarefas { padding-left: 1.4rem; display: grid; gap: 0.8rem; font-size: 1.1rem; }
+.tarefa::marker { font-family: var(--display); font-weight: 700; }
+.tarefa.feita { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--tinta-3); }
+.tarefa.feita::marker { content: "✓  "; color: var(--achado); }
+.frase-alvo { background: color-mix(in srgb, var(--achado) 25%, transparent); }
+.mini-campo { font: inherit; width: 5rem; margin-left: 0.4rem; background: transparent; color: var(--tinta); border: 0; border-bottom: 2px solid var(--tinta); }
+.alvo-tab { font: 700 0.95rem/1 var(--texto); background: var(--achado); color: #000; border: 0; border-radius: 999px; padding: 0.4rem 0.8rem; }
+.chuva { position: fixed; inset: 0; pointer-events: none; z-index: 45; overflow: hidden; }
+.chuva span { position: absolute; top: 0; font-family: var(--display); font-weight: 800; color: var(--achado); }
+.chuva span:nth-child(3n) { color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ast-bracos, .ponto-final.tremendo, .nao-clique, .seta-cima, .mosca, .boca.mastigando, .pe.cambalhota, .toca-pe { animation: none; }
+  .mosca { left: 45%; }
+  .ast-casa { transition: none; }
 }
 
 /* o pôster só existe no papel */

@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
+  <!-- *oi, você que lê código-fonte. aqui embaixo não tem nada de interessante. -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>não feche esta aba</title>
@@ -19,6 +20,7 @@
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
+  <!-- *a senha do porão é marmelada. não conta pro Pé. -->
   <a class="skip" href="#palco">Pular para o jogo</a>
 
   <header class="topo">
@@ -31,7 +33,10 @@
 
   <div class="folha">
     <aside class="margem" aria-label="Pé, o pé-de-mosca">
-      <div id="pe-casa" class="pe-casa"></div>
+      <div class="pe-casa">
+        <div id="pe-casa"></div>
+        <div id="ast-casa" class="ast-casa" hidden></div>
+      </div>
     </aside>
 
     <main id="palco" class="palco" tabindex="-1">
@@ -43,7 +48,7 @@
 
   <nav id="sumario" class="sumario" aria-labelledby="sumario-titulo" hidden>
     <h2 id="sumario-titulo">Sumário</h2>
-    <ol id="sumario-lista"></ol>
+    <div id="sumario-lista" class="sumario-lista"></div>
   </nav>
 
   <div id="anuncio" class="so-leitor" aria-live="polite"></div>

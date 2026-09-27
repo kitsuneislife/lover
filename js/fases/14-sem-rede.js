@@ -1,4 +1,21 @@
-// § 14: eventos online/offline. O service worker mantém a página viva sem internet.
+// § 14: sem internet. navigator.onLine só sabe se existe alguma rede ligada
+// (Wi-Fi conectado a um roteador sem internet ainda conta como "online").
+// Por isso o jogo também manda uma sonda de verdade para o servidor a cada 2,5 s.
+// O service worker deixa a sonda passar direto, sem responder do cache.
+
+async function sondar() {
+  if (!navigator.onLine) return false;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 2500);
+  try {
+    const r = await fetch(`./sonda.txt?t=${Date.now()}`, { cache: "no-store", signal: ctrl.signal });
+    return r.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(t);
+  }
+}
 
 export default {
   id: "sem-rede",
@@ -18,18 +35,36 @@ export default {
     "esta página funciona offline porque um service worker guardou cada arquivo quando você chegou. pode religar a internet quando quiser.",
   ],
   montar(ctx) {
-    ctx.palco.innerHTML = `<p class="sinal" aria-live="polite"></p>`;
+    ctx.palco.innerHTML = `<p class="sinal" aria-live="polite">escutando…</p>`;
     const sinal = ctx.palco.firstElementChild;
-    const pintar = () => { sinal.textContent = navigator.onLine ? "conectado" : "desconectado"; };
-    pintar();
+    let conectado = null;
+    let ocupado = false;
 
-    ctx.on(window, "offline", () => { pintar(); ctx.resolver(); });
-    ctx.on(window, "online", () => {
-      pintar();
-      if (ctx.resolvida) ctx.dizer("o chiado voltou. tudo bem, eu me acostumo.");
-    });
-    if (!navigator.onLine) {
-      ctx.depois(600, () => ctx.resolver(["você já estava sem internet. então o silêncio é seu, não meu.", "pode religar quando quiser."]));
-    }
+    const atualizar = (on) => {
+      if (on === conectado) return;
+      const antes = conectado;
+      conectado = on;
+      sinal.textContent = on ? "conectado" : "desconectado";
+      if (!on) {
+        ctx.resolver(antes === null
+          ? ["você já estava sem internet. o silêncio já era seu.", "pode religar quando quiser."]
+          : undefined);
+      } else if (ctx.resolvida) {
+        ctx.dizer("o chiado voltou. tudo bem, eu me acostumo.");
+      }
+    };
+
+    const conferir = async () => {
+      if (ocupado) return;
+      ocupado = true;
+      const on = await sondar();
+      ocupado = false;
+      atualizar(on);
+    };
+
+    conferir();
+    ctx.cada(2500, conferir);
+    ctx.on(window, "offline", () => atualizar(false));
+    ctx.on(window, "online", conferir);
   },
 };

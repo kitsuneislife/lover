@@ -11,6 +11,8 @@ let ligado = ler("som", true);
 
 function audio() {
   if (!ligado) return null;
+  // antes do primeiro clique o navegador bloqueia o áudio; nem tenta
+  if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return null;
   if (!ctx) {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
@@ -72,6 +74,24 @@ export const som = {
     nota(220, 0.25, { tipo: "triangle", vol: 0.08 });
     nota(207.6, 0.3, { tipo: "triangle", vol: 0.06, quando: 0.09 });
   },
+  // a página inteira escoando pelo ponto final
+  portal() {
+    const a = audio();
+    if (!a) return;
+    const t = a.currentTime;
+    const osc = a.createOscillator();
+    const g = a.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, t);
+    osc.frequency.exponentialRampToValueAtTime(55, t + 2.2);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.14, t + 0.15);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 2.4);
+    osc.connect(g).connect(a.destination);
+    osc.start(t);
+    osc.stop(t + 2.5);
+    nota(98, 0.9, { tipo: "triangle", vol: 0.12, quando: 2.1 });
+  },
   pulo() {
     nota(392, 0.12, { tipo: "triangle", vol: 0.07 });
     nota(587.3, 0.18, { tipo: "triangle", vol: 0.07, quando: 0.07 });
@@ -98,6 +118,12 @@ export function desenharFavicon({ olhos = "abertos", cor = "#000", fundo = "#fff
   const corpo = olhos === "vazio" ? "" : `<path fill="${cor}" d="${PE_CAMINHO}"/>${olhosSvg}`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 136"><rect width="100" height="136" rx="18" fill="${fundo}"/>${corpo}</svg>`;
   el.href = "data:image/svg+xml," + encodeURIComponent(svg);
+}
+
+// uma fase pode desenhar o que quiser no favicon
+export function faviconBruto(svg) {
+  const el = favicon();
+  if (el) el.href = "data:image/svg+xml," + encodeURIComponent(svg);
 }
 
 // ---------- título da aba ----------
